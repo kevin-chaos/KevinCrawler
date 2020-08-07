@@ -31,6 +31,9 @@ class ShiYanLou:
         n = 1
         start = time.time()
         while error <= 1000:
+            if n in table.distinct('uid'):
+                print(f'\r{n}', end='')
+                continue
             url = f'https://www.shiyanlou.com/courses/{n}'
             r = req_get(url, header=self.header, proxy=self.proxy)
             if not r:
@@ -65,11 +68,7 @@ class ShiYanLou:
                 course['price'] = re.search(r'(\d+)', soup.find('span', class_='real-price').text).group(1)
             except AttributeError:
                 course['price'] = '0'
-            img_url = soup.find('div', class_="box-body-top course-cover").find('img')['src']
-            img_name = img_url.split('/')[-1]
-            img_name = img_name + '.jpg' if '.' not in img_name else img_name
-            course['pic'] = 'C://Users/zhaoy/K.I.T/SelfMediaOperate/docs/老K玩代码/img/实验楼/' + img_name
-            download_image(img_url, course['pic'])
+            course['img_url'] = soup.find('div', class_="box-body-top course-cover").find('img')['src']
             table.update_one({"uid": course['uid']}, {"$set": course}, True)
             end = time.time()
             spend = end - start
